@@ -31,14 +31,30 @@ def get_entry(id: int):
 def get_type():
     return _db.get_types()
 
+@app.get("/type/{id}")
+def get_type(id: int):
+    return _db.get_type(id)
+
 @app.post("/type")
 def insert_type(name: str):
     return _db.insert_type(name)
+
+@app.delete("/type/{id}")
+def del_type(id: int):
+    return _db.del_type(id)
 
 @app.get("/cat")
 def get_cat():
     return _db.get_categorias()
 
+@app.get("/cat/{id}")
+def get_cat(id: int):
+    return _db.get_categoria(id)
+
 @app.post("/cat")
 def insert_cat(name: str):
     return _db.insert_cat(name)
+
+@app.delete("/cat/{id}")
+def del_cat(id: int):
+    return _db.del_cat(id)

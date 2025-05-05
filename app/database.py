@@ -82,21 +82,21 @@ class Database():
             print(f"Error: {err}")
             return False
     
-    def get_categorias(self):
-        try:
-            query = "SELECT id, cat_name FROM categorias"
-            self.cur.execute(query)
-            results = self.cur.fetchall()
-            return parse_enum(results, "cat")
-
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return False
-    
     def get_types(self):
         try:
             query = "SELECT id, type_name FROM types"
             self.cur.execute(query)
+            results = self.cur.fetchall()
+            return parse_enum(results, "type")
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def get_type(self, id):
+        try:
+            query = "SELECT id, type_name FROM types WHERE id = %s"
+            data = (id, )
+            self.cur.execute(query, data)
             results = self.cur.fetchall()
             return parse_enum(results, "type")
         except mysql.connector.Error as err:
@@ -114,10 +114,55 @@ class Database():
             print(f"Error: {err}")
             return False
     
+    def del_type(self, id):
+        try:
+            query = "DELETE FROM types WHERE id = %s"
+            data = (id, )
+            self.cur.execute(query, data)
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def get_categorias(self):
+        try:
+            query = "SELECT id, cat_name FROM categorias"
+            self.cur.execute(query)
+            results = self.cur.fetchall()
+            return parse_enum(results, "cat")
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def get_categoria(self, id):
+        try:
+            query = "SELECT id, cat_name FROM categorias WHERE id = %s"
+            data = (id, )
+            self.cur.execute(query, data)
+            results = self.cur.fetchall()
+            return parse_enum(results, "cat")
+
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
     def insert_cat(self, name):
         try:
             query = "INSERT INTO categorias (cat_name) VALUES (%s)"
             data = (name, )
+            self.cur.execute(query, data)
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def del_cat(self, id):
+        try:
+            query = "DELETE FROM categorias WHERE id = %s"
+            data = (id, )
             self.cur.execute(query, data)
             self.conn.commit()
             return True
