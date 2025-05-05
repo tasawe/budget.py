@@ -10,7 +10,9 @@ def parse_entries(entries):
             "amount": e[1],
             "description": e[2],
             "category": e[3],
-            "type" : e[4]
+            "type" : e[4],
+            "category_id": e[5],
+            "type_id": e[6]
             })
     return ret
 
@@ -61,10 +63,21 @@ class Database():
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return False
+    
+    def edit_entry(self, id, entry):
+        try:
+            query = "UPDATE entries SET description = %s, amount=%s, category_id=%s, type_id=%s WHERE id = %s"
+            data = (entry.desc, entry.amount, entry.cat, entry.type, id)
+            self.cur.execute(query, data)
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
         
     def get_entries(self, token):
         try:
-            query = "SELECT entries.id, entries.amount, entries.description, categorias.cat_name, types.type_name FROM entries JOIN categorias JOIN types WHERE entries.category_id = categorias.id AND entries.type_id = types.id AND entries.user_id=%s"
+            query = "SELECT entries.id, entries.amount, entries.description, categorias.cat_name, types.type_name, categorias.id, types.id FROM entries JOIN categorias JOIN types WHERE entries.category_id = categorias.id AND entries.type_id = types.id AND entries.user_id=%s"
             data = (self.get_user_id(token), )
             self.cur.execute(query, data)
             results = self.cur.fetchall()

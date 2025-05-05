@@ -29,6 +29,39 @@
             window.location.reload();
         });
     }
+    function editEntry(id) {
+        form = document.getElementById("form-edit-entry");
+        data = {
+            "desc": form.elements[0].value,
+            "cat": parseInt(form.elements[1].value),
+            "type": parseInt(form.elements[2].value),
+            "amount": parseFloat(form.elements[3].value)
+        }
+        fetch(`/api/entry/${id}`, {
+            method: "PUT", 
+            body: JSON.stringify(data), 
+            headers: {"content-type": "application/json"}
+        }).then(res => res.json()).then(res => {
+            window.location.reload();
+        });
+    }
+    window.onload = function() {
+        var editModal = document.getElementById("edit-entry");
+        editModal.addEventListener('show.bs.modal', function(event)  {
+            var btn = event.relatedTarget;
+            var cat = btn.getAttribute('data-bs-cat');
+            var desc = btn.getAttribute('data-bs-desc');
+            var type = btn.getAttribute('data-bs-type');
+            var amount = btn.getAttribute('data-bs-amount');
+            var id = btn.getAttribute('data-bs-entryid');
+            document.getElementById("description-edit").value = desc;
+            document.getElementById("category-edit").value = cat;
+            document.getElementById("type-edit").value = type;
+            document.getElementById("amount-edit").value = amount;
+            document.getElementById("edit-entry-btn").onclick = () => {editEntry(id);}
+        });
+    }
+    
 </script>
 {% endblock %}
 
@@ -38,11 +71,37 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Entry</h5>
+                    <h5 class="modal-title">Editar Entrada</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>placeholder</p>
+                    <form id="form-edit-entry">
+                    <div class="form-group">
+                        <label for="description-edit">Descrição</label>
+                        <input type="text" class="form-control" id="description-edit" placeholder="Descrição">
+                    </div>
+                    <div class="form-group">
+                        <label for="category-edit">Categoria</label>
+                        <select class="form-control" id="category-edit">
+                        {% for c in categorias %}
+                            <option value="{{ c.id }}">{{ c.cat_name.capitalize() }}</option>
+                        {% endfor %}
+                        </select>
+                      </div>
+                      <div class="form-group">
+                          <label for="type-edit">Tipo</label>
+                          <select class="form-control" id="type-edit">
+                            {% for t in types %}
+                            <option value="{{ t.id }}">{{ t.type_name.capitalize() }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      <div class="form-group">
+                        <label for="amount-edit">Valor</label>
+                        <input type="text" inputmode="numeric" id="amount-edit" class="form-control">
+                      </div>
+                      <button type="button" class="btn btn-primary" onclick="editEntry()" id="edit-entry-btn">Salvar</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -105,7 +164,7 @@
                 <td>{{ e.category }}</td>
                 <td>{{ e.type }}</td>
                 <td>
-                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-entry">Editar</button>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-entry" data-bs-desc="{{ e.description }}" data-bs-amount="{{ e.amount }}" data-bs-cat="{{ e.category_id }}" data-bs-type="{{ e.type_id }}" data-bs-entryid="{{ e.id }}">Editar</button>
                     <button class="btn btn-danger" onclick="delEntry({{ e.id }})">Excluir</button>
                 </td>
             </tr>

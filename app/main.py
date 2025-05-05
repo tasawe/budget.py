@@ -87,8 +87,7 @@ def callback(request: Request, code: str, state: str):
             client_secret=CLIENT_SECRET, 
             authorization_response=str(request.url)
         )
-        #return JSONResponse(content={"token": token})
-        
+
         access_token = token.get("access_token")
         if not access_token:
             raise HTTPException(status_code=400, detail="No access token in response.")
@@ -96,7 +95,7 @@ def callback(request: Request, code: str, state: str):
         userinfo_response = requests.get("https://www.googleapis.com/oauth2/v1/userinfo", headers={"Authorization": f"Bearer {access_token}"})
         if not userinfo_response.ok:
             raise HTTPException(status_code=400, detail="Failed to fetch user info.")
-        
+
         user_info = userinfo_response.json()
         email = user_info.get("email")
         name = user_info.get("name")
@@ -104,7 +103,7 @@ def callback(request: Request, code: str, state: str):
         if not _db.save_token(email=email, name=name, token=access_token):
             raise HTTPException(status_code=500, detail="Failed to save user.")
 
-        response = RedirectResponse(url="/api/")
+        response = RedirectResponse(url="/")
         response.set_cookie(key="auth_token", value=access_token, httponly=True)
         response.delete_cookie("oauth_state")
         return response
@@ -139,6 +138,12 @@ def add_entry(request: Request, entry: Entry):
 def del_entry(request: Request, id: int):
     ret = _db.del_entry(id)
     return "Ok" if ret else "Error"
+
+@app.put("/api/entry/{id}")
+@auth_required
+def edit_entry(request: Request, id: int, entry: Entry):
+    ret = _db.edit_entry(id, entry)
+    return "Ok" if ret else "Error" 
 
 @app.get("/api/entry")
 @auth_required
