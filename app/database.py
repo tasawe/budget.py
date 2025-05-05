@@ -1,4 +1,5 @@
 import mysql.connector
+import uuid
 from settings import *
 
 def parse_entries(entries):
@@ -39,10 +40,10 @@ class Database():
     def close(self):
         self.conn.close()
 
-    def insert_entry(self, amount, cat_id, type_id, description = ""):
+    def insert_entry(self, token, amount, cat_id, type_id, description = ""):
         try:
-            query = "INSERT INTO entries (amount, category_id, type_id, description) VALUES (%s, %s, %s, %s) "
-            data = (amount, cat_id, type_id, description)
+            query = "INSERT INTO entries (amount, category_id, type_id, description, user_id) VALUES (%s, %s, %s, %s, %s) "
+            data = (amount, cat_id, type_id, description, self.get_user_id(token))
             self.cur.execute(query, data)
             self.conn.commit()
             return True
@@ -61,20 +62,21 @@ class Database():
             print(f"Error: {err}")
             return False
         
-    def get_entries(self):
+    def get_entries(self, token):
         try:
-            query = "SELECT entries.id, entries.amount, entries.description, categorias.cat_name, types.type_name FROM entries JOIN categorias JOIN types WHERE entries.category_id = categorias.id AND entries.type_id = types.id"
-            self.cur.execute(query)
+            query = "SELECT entries.id, entries.amount, entries.description, categorias.cat_name, types.type_name FROM entries JOIN categorias JOIN types WHERE entries.category_id = categorias.id AND entries.type_id = types.id AND entries.user_id=%s"
+            data = (self.get_user_id(token), )
+            self.cur.execute(query, data)
             results = self.cur.fetchall()
             return parse_entries(results)
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return False
     
-    def get_entry(self, id):
+    def get_entry(self, id, token):
         try:
-            query = "SELECT entries.id, entries.amount, entries.description, categorias.cat_name, types.type_name FROM entries JOIN categorias JOIN types WHERE entries.category_id = categorias.id AND entries.type_id = types.id AND entries.id = %s"
-            data = (id, )
+            query = "SELECT entries.id, entries.amount, entries.description, categorias.cat_name, types.type_name FROM entries JOIN categorias JOIN types WHERE entries.category_id = categorias.id AND entries.type_id = types.id AND entries.id = %s AND entries.user_id=%s"
+            data = (id, self.get_user_id(token))
             self.cur.execute(query, data)
             result = self.cur.fetchall()
             return parse_entries(result)
@@ -166,6 +168,53 @@ class Database():
             self.cur.execute(query, data)
             self.conn.commit()
             return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def save_token(self, email, name, token):
+        try:
+            # primeiro checa usuario
+            query = "SELECT id FROM users WHERE email=%s"
+            data = (email, )
+            self.cur.execute(query, data)
+            user = self.cur.fetchall()
+            if len(user) > 0:
+                # usuario ja existe, atualiza token
+                query = "UPDATE users SET token=%s WHERE email=%s"
+                data = (token, email)
+                self.cur.execute(query, data)
+                self.conn.commit()
+                return True
+            else:
+                # usuario nao existe, adiciona
+                id = str(uuid.uuid4())
+                query = "INSERT INTO users (id, email, user_name, token) VALUES (%s, %s, %s, %s)"
+                data = (id, email, name, token)
+                self.cur.execute(query, data)
+                self.conn.commit()
+                return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def validate_token(self, token):
+        try:
+            query = "SELECT token FROM users WHERE token=%s"
+            data = (token, )
+            self.cur.execute(query, data)
+            tk = self.cur.fetchall()
+            return len(tk) > 0
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def get_user_id(self, token):
+        try:
+            query = "SELECT id FROM users WHERE token=%s"
+            data = (token, )
+            self.cur.execute(query, data)
+            return self.cur.fetchall()[0][0]
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return False

@@ -10,6 +10,7 @@ CREATE TABLE categorias (
 
 CREATE TABLE entries (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     amount DECIMAL(10, 2) NOT NULL,
     category_id INT NOT NULL,
@@ -17,6 +18,13 @@ CREATE TABLE entries (
     FOREIGN KEY (category_id) REFERENCES categorias(id),
     FOREIGN KEY (type_id) REFERENCES types(id)
 );
+
+CREATE TABLE users (
+    id VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    user_name VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL
+)
 
 INSERT INTO types(type_name) VALUES ("receita");
 INSERT INTO types(type_name) VALUES ("despesa");
