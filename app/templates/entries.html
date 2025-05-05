@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Entradas{% endblock %}
+
+{% block head_includes%}
+<script>
+    function delEntry(id) {
+        fetch(`/api/entry/${id}`, {method: "DELETE"}).then(res => res.json()).then(res => {
+            console.log(res);
+            window.location.reload();
+        });
+    }
+    function addEntry() {
+        form = document.getElementById("form-add-entry");
+        data = {
+            "desc": form.elements[0].value,
+            "cat": parseInt(form.elements[1].value),
+            "type": parseInt(form.elements[2].value),
+            "amount": parseFloat(form.elements[3].value)
+        }
+        header = {
+            "Content-Type": "application/json"
+        }
+        fetch(`/api/entry`, {
+            method: "POST", 
+            body: JSON.stringify(data), 
+            headers: {"content-type": "application/json"}
+        }).then(res => res.json()).then(res => {
+            window.location.reload();
+        });
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<main>
+    <div class="modal fade" tabindex="-1" id="edit-entry">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>placeholder</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" id="add-entry">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Entrada</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-add-entry">
+                        <div class="form-group">
+                          <label for="description">Descrição</label>
+                          <input type="text" class="form-control" id="description" placeholder="Descrição">
+                        </div>
+                        <div class="form-group">
+                          <label for="category">Categoria</label>
+                          <select class="form-control" id="category">
+                            {% for c in categorias %}
+                            <option value="{{ c.id }}">{{ c.cat_name.capitalize() }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Tipo</label>
+                            <select class="form-control" id="type">
+                              {% for t in types %}
+                              <option value="{{ t.id }}">{{ t.type_name.capitalize() }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        <div class="form-group">
+                          <label for="amount">Valor</label>
+                          <input type="text" inputmode="numeric" id="amount" class="form-control">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addEntry()">Salvar</button>
+                      </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Descrição</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Tipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in entradas %}
+            <tr>
+                <td>{{ e.description }}</td>
+                <td>{{ e.amount }}</td>
+                <td>{{ e.category }}</td>
+                <td>{{ e.type }}</td>
+                <td>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-entry">Editar</button>
+                    <button class="btn btn-danger" onclick="delEntry({{ e.id }})">Excluir</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-entry">Adicionar Entrada</button>
+</div>
+{% endblock %}

@@ -218,3 +218,13 @@ class Database():
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return False
+    
+    def get_username(self, token):
+        try:
+            query = "SELECT user_name FROM users WHERE token=%s"
+            data = (token, )
+            self.cur.execute(query, data)
+            return self.cur.fetchall()[0][0]
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
