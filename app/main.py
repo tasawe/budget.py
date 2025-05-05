@@ -9,7 +9,20 @@ _db = database.Database()
 def read_root():
     return {"Hello": "World"}
 
-@app.post("/add_entry")
-def add_entry(amount: float, cat: int, desc: str):
-    ret = _db.insert_entry(amount=amount, cat_id=cat, description=desc)
+@app.post("/entry")
+def add_entry(amount: float, cat: int, type: int, desc: str):
+    ret = _db.insert_entry(amount=amount, cat_id=cat, description=desc, type_id=type)
     return "Ok" if ret else "Error"
+
+@app.delete("/entry/{id}")
+def del_entry(id: int):
+    ret = _db.del_entry(id)
+    return "Ok" if ret else "Error"
+
+@app.get("/entry")
+def get_all_entries():
+    return _db.get_entries()
+
+@app.get("/entry/{id}")
+def get_entry(id: int):
+    return _db.get_entry(id)
