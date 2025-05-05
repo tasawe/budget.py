@@ -1,6 +1,6 @@
 ## TODO
 
-- [ ] Cadastro de receitas e despesas
+- [x] Cadastro de receitas e despesas
 - [ ] Categorias personalizaveis
 - [ ] Orçamento mensal por categoria
 - [ ] Saldo por conta
