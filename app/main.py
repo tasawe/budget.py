@@ -26,3 +26,19 @@ def get_all_entries():
 @app.get("/entry/{id}")
 def get_entry(id: int):
     return _db.get_entry(id)
+
+@app.get("/type")
+def get_type():
+    return _db.get_types()
+
+@app.post("/type")
+def insert_type(name: str):
+    return _db.insert_type(name)
+
+@app.get("/cat")
+def get_cat():
+    return _db.get_categorias()
+
+@app.post("/cat")
+def insert_cat(name: str):
+    return _db.insert_cat(name)
