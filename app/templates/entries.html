@@ -3,6 +3,15 @@
 {% block title %}Entradas{% endblock %}
 
 {% block head_includes%}
+<style>
+    .table-striped>tbody>.red>* {
+        --bs-table-bg-type: red !important;
+    }
+    .table-striped>tbody>.green>* {
+        --bs-table-bg-type: green !important;
+    }
+</style>
+
 <script>
     function delEntry(id) {
         fetch(`/api/entry/${id}`, {method: "DELETE"}).then(res => res.json()).then(res => {
@@ -158,11 +167,11 @@
         </thead>
         <tbody>
             {% for e in entradas %}
-            <tr>
-                <td>{{ e.description }}</td>
-                <td>{{ e.amount }}</td>
-                <td>{{ e.category }}</td>
-                <td>{{ e.type }}</td>
+            <tr class="{{e.color}}">
+                <td>{{ e.description.capitalize() }}</td>
+                <td>R${{ e.amount }}</td>
+                <td>{{ e.category.capitalize() }}</td>
+                <td>{{ e.type.capitalize() }}</td>
                 <td>
                     <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-entry" data-bs-desc="{{ e.description }}" data-bs-amount="{{ e.amount }}" data-bs-cat="{{ e.category_id }}" data-bs-type="{{ e.type_id }}" data-bs-entryid="{{ e.id }}">Editar</button>
                     <button class="btn btn-danger" onclick="delEntry({{ e.id }})">Excluir</button>

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Categorias{% endblock %}
+
+{% block head_includes %}
+<script>
+    function addEntry() {
+        form = document.getElementById("form-add-entry");
+        data = {
+            "name": form.elements[0].value
+        }
+        header = {
+            "Content-Type": "application/json"
+        }
+        fetch(`/api/cat`, {
+            method: "POST", 
+            body: JSON.stringify(data), 
+            headers: {"content-type": "application/json"}
+        }).then(res => res.json()).then(res => {
+            window.location.reload();
+        });
+    }
+    function delEntry(id) {
+        fetch(`/api/cat/${id}`, {method: "DELETE"}).then(res => res.json()).then(res => {
+            window.location.reload();
+        });
+    }
+    function editEntry(id) {
+        form = document.getElementById("form-edit-entry");
+        data = {
+            "name": form.elements[0].value
+        }
+        fetch(`/api/cat/${id}`, {
+            method: "PUT", 
+            body: JSON.stringify(data), 
+            headers: {"content-type": "application/json"}
+        }).then(res => res.json()).then(res => {
+            window.location.reload();
+        });
+    }
+
+    window.onload = function() {
+        var editModal = document.getElementById("edit-cat");
+        editModal.addEventListener('show.bs.modal', function(event)  {
+            var btn = event.relatedTarget;
+            var cat_id = btn.getAttribute('data-bs-catid');
+            var name = btn.getAttribute('data-bs-catname');
+            document.getElementById("name-edit").value = name;
+            document.getElementById("edit-entry-btn").onclick = () => {editEntry(cat_id);}
+        });
+    }
+</script>
+{% endblock %}
+
+
+{% block content %}
+<main>
+    <div class="modal fade" tabindex="-1" id="edit-cat">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-edit-entry">
+                    <div class="form-group">
+                        <label for="name-edit">Nome</label>
+                        <input type="text" class="form-control" id="name-edit" placeholder="Nome">
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="editEntry()" id="edit-entry-btn">Salvar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" id="add-cat">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-add-entry">
+                        <div class="form-group">
+                          <label for="description">Nome</label>
+                          <input type="text" class="form-control" id="description" placeholder="Nome">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addEntry()">Salvar</button>
+                      </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Categoria</th>
+                <th scope="col">ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in categorias %}
+            <tr>
+                <td>{{ c.cat_name.capitalize() }}</td>
+                <td>{{ c.id }}</td>
+                <td>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit-cat" data-bs-catname="{{ c.cat_name }}" data-bs-catid="{{ c.id }}">Editar</button>
+                    <button class="btn btn-danger" onclick="delEntry({{ c.id }})">Excluir</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-cat">Adicionar Categoria</button>
+</div>
+{% endblock %}

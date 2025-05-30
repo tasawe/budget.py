@@ -34,6 +34,9 @@ class Entry(BaseModel):
     cat: int
     type: int
 
+class Category(BaseModel):
+    name: str
+
 load_dotenv()
 
 _db = database.Database()
@@ -62,7 +65,7 @@ def read_root(request: Request):
     if request.cookies.get("auth_token") is None:
         return templates.TemplateResponse("index-loggedout.html", {"request": request})
     else:
-        return RedirectResponse(url="/api/index")
+        return RedirectResponse(url="/index")
 
 @app.get("/api/login")
 def login():
@@ -122,6 +125,12 @@ def index(request: Request):
 def entries(request: Request):
     token = request.cookies.get("auth_token")
     return templates.TemplateResponse("entries.html", {"request": request, "entradas": _db.get_entries(token), "categorias": _db.get_categorias(), "types": _db.get_types()})
+
+@app.get("/categorias")
+@auth_required
+def categorias(request: Request):
+    token = request.cookies.get("auth_token")
+    return templates.TemplateResponse("categorias.html", {"request": request, "categorias": _db.get_categorias()})
 
 @app.post("/api/entry")
 @auth_required
@@ -185,10 +194,16 @@ def get_cat(request: Request):
 def get_cat(request: Request, id: int):
     return _db.get_categoria(id)
 
+@app.put("/api/cat/{id}")
+@auth_required
+def edit_cat(request: Request, id: int, cat: Category):
+    ret = _db.edit_cat(id, cat.name)
+    return "Ok" if ret else "Error" 
+
 @app.post("/api/cat")
 @auth_required
-def insert_cat(request: Request, name: str):
-    return _db.insert_cat(name)
+def insert_cat(request: Request, cat: Category):
+    return _db.insert_cat(cat.name)
 
 @app.delete("/api/cat/{id}")
 @auth_required

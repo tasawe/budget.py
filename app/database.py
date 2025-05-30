@@ -12,7 +12,8 @@ def parse_entries(entries):
             "category": e[3],
             "type" : e[4],
             "category_id": e[5],
-            "type_id": e[6]
+            "type_id": e[6],
+            "color": "red" if e[6] == 2 else "green"
             })
     return ret
 
@@ -32,7 +33,7 @@ def parse_enum(list, enum_type):
 class Database():
     def __init__(self):
         self.conn = mysql.connector.connect(
-            host = "localhost",
+            host = MYSQL_HOST,
             user = MYSQL_USER,
             passwd = MYSQL_PWD,
             database = MYSQL_DB
@@ -176,8 +177,26 @@ class Database():
     
     def del_cat(self, id):
         try:
-            query = "DELETE FROM categorias WHERE id = %s"
+            if id == 1:
+                return
+            query = "UPDATE entries SET category_id = -1 WHERE category_id=%s"
             data = (id, )
+            self.cur.execute(query, data)
+            self.conn.commit()
+            query = "DELETE FROM categorias WHERE id = %s"
+            self.cur.execute(query, data)
+            self.conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return False
+    
+    def edit_cat(self, id, name):
+        try:
+            if id == 1:
+                return
+            query = "UPDATE categorias SET cat_name = %s WHERE id = %s"
+            data = (name, id)
             self.cur.execute(query, data)
             self.conn.commit()
             return True
